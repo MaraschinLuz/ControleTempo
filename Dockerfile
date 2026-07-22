@@ -15,7 +15,8 @@ FROM dunglas/frankenphp:1-php8.3-bookworm
 WORKDIR /app
 
 RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
-    && install-php-extensions pdo_pgsql mbstring intl zip opcache
+    && install-php-extensions pdo_pgsql mbstring intl zip opcache \
+    && setcap -r /usr/local/bin/frankenphp
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY . .
