@@ -10,6 +10,44 @@
         @endforeach
     </div>
 
+    @if(auth()->user()->isManagerOrAdmin())
+        <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-100 p-5">
+                <h2 class="font-bold">Indicadores por usuário</h2>
+                <p class="mt-1 text-sm text-slate-500">Horas contabilizadas dos usuários ativos e lançamentos pendentes de aprovação.</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+                        <tr>
+                            <th class="p-4">Usuário</th>
+                            <th class="p-4">Hoje</th>
+                            <th class="p-4">Nesta semana</th>
+                            <th class="p-4">Neste mês</th>
+                            <th class="p-4">Pendentes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($userIndicators as $indicator)
+                            <tr class="border-t border-slate-100 hover:bg-slate-50/70">
+                                <td class="p-4">
+                                    <a href="{{ route('dashboard', ['user_id' => $indicator->id]) }}" class="font-semibold text-slate-900 hover:text-cyan-700">{{ $indicator->name }}</a>
+                                    <span class="block text-xs text-slate-500">{{ $indicator->role->label() }}</span>
+                                </td>
+                                <td class="p-4 font-bold text-cyan-700"><x-duration :seconds="$indicator->today_seconds ?? 0" /></td>
+                                <td class="p-4 font-bold text-indigo-700"><x-duration :seconds="$indicator->week_seconds ?? 0" /></td>
+                                <td class="p-4 font-bold text-emerald-700"><x-duration :seconds="$indicator->month_seconds ?? 0" /></td>
+                                <td class="p-4 font-bold text-amber-700"><x-duration :seconds="$indicator->pending_seconds ?? 0" /></td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="p-8 text-center text-slate-500">Nenhum usuário ativo encontrado.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    @endif
+
     <section class="mt-6 rounded-2xl bg-slate-950 p-5 text-white shadow-xl sm:p-6">
         @if($runningEntry)
             <div class="flex flex-col justify-between gap-5 md:flex-row md:items-center" x-data="{elapsed: {{ now()->timestamp - $runningEntry->started_at->timestamp }}, timer:null, formatted(){let h=Math.floor(this.elapsed/3600),m=Math.floor((this.elapsed%3600)/60),s=this.elapsed%60;return [h,m,s].map(v=>String(v).padStart(2,'0')).join(':')}}" x-init="timer=setInterval(()=>elapsed++,1000)">

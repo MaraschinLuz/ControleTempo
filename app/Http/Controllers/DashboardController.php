@@ -24,6 +24,23 @@ class DashboardController extends Controller
         $sum = fn ($start, $end) => (clone $base)->counted()->whereBetween('started_at', [$start, $end])->sum('duration_seconds');
         $monthEntries = (clone $base)->counted()->with(['project.client', 'activity'])->whereBetween('started_at', [$periodStart, $periodEnd])->get();
         $groupSeconds = fn ($key) => $monthEntries->groupBy($key)->map(fn ($rows) => round($rows->sum('duration_seconds') / 3600, 2));
+        $userIndicators = $user->isManagerOrAdmin()
+            ? User::query()
+                ->where('active', true)
+                ->withSum(['timeEntries as today_seconds' => fn ($query) => $query
+                    ->counted()
+                    ->whereBetween('started_at', [$now->startOfDay(), $now->endOfDay()])], 'duration_seconds')
+                ->withSum(['timeEntries as week_seconds' => fn ($query) => $query
+                    ->counted()
+                    ->whereBetween('started_at', [$now->startOfWeek(), $now->endOfWeek()])], 'duration_seconds')
+                ->withSum(['timeEntries as month_seconds' => fn ($query) => $query
+                    ->counted()
+                    ->whereBetween('started_at', [$now->startOfMonth(), $now->endOfMonth()])], 'duration_seconds')
+                ->withSum(['timeEntries as pending_seconds' => fn ($query) => $query
+                    ->where('status', EntryStatus::Pending->value)], 'duration_seconds')
+                ->orderBy('name')
+                ->get()
+            : collect();
 
         return view('dashboard', [
             'todaySeconds' => $sum($now->startOfDay(), $now->endOfDay()),
@@ -36,6 +53,7 @@ class DashboardController extends Controller
             'clientChart' => $groupSeconds('project.client.name'),
             'activityChart' => $groupSeconds('activity.name'),
             'estimateChart' => Project::query()->where('status', 'active')->withSum(['timeEntries as realized_seconds' => fn ($q) => $q->counted()], 'duration_seconds')->get(),
+            'userIndicators' => $userIndicators,
             'clients' => Client::query()->where('active', true)->orderBy('name')->get(),
             'projects' => Project::query()->where('status', 'active')->with('client')->orderBy('name')->get(),
             'activities' => Activity::query()->where('active', true)->orderBy('name')->get(),
