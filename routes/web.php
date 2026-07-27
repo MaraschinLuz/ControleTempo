@@ -6,6 +6,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectScheduleController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TimeEntryController;
@@ -27,6 +28,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/registros/{time_entry}/aprovar', [ApprovalController::class, 'approve'])->name('time-entries.approve');
     Route::patch('/registros/{time_entry}/rejeitar', [ApprovalController::class, 'reject'])->name('time-entries.reject');
     Route::get('/relatorios', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/cronograma', [ProjectScheduleController::class, 'index'])->name('project-schedules.index');
+    Route::put('/cronograma/{project}', [ProjectScheduleController::class, 'update'])->name('project-schedules.update');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

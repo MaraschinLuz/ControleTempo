@@ -28,6 +28,11 @@ class Project extends Model
         return $this->hasMany(TimeEntry::class);
     }
 
+    public function scheduleRows()
+    {
+        return $this->hasMany(ProjectScheduleRow::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status === ProjectStatus::Active && $this->client?->active;
