@@ -96,33 +96,10 @@
             </form>
         </section>
 
-        <section class="mb-4 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4 shadow-sm">
-            <form method="POST" action="{{ route('project-schedules.columns.store', $selectedProject) }}" class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-                @csrf
-                <div>
-                    <h2 class="font-bold text-indigo-950">Adicionar coluna</h2>
-                    <p class="mt-1 text-sm text-indigo-800">A nova coluna será adicionada ao final. Use as setas no cabeçalho para ajustar sua posição.</p>
-                </div>
-                <div class="grid gap-2 sm:grid-cols-[minmax(220px,1fr)_180px_auto]">
-                    <label class="text-xs font-bold uppercase tracking-wide text-indigo-900">
-                        Nome da coluna
-                        <input name="label" value="{{ old('label') }}" maxlength="80" required placeholder="Ex.: Observações" class="mt-1 block w-full rounded-xl border-indigo-200 bg-white text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    </label>
-                    <label class="text-xs font-bold uppercase tracking-wide text-indigo-900">
-                        Tipo
-                        <select name="type" class="mt-1 block w-full rounded-xl border-indigo-200 bg-white text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <option value="text">Texto curto</option>
-                            <option value="textarea">Texto longo</option>
-                            <option value="date">Data</option>
-                            <option value="number">Número</option>
-                        </select>
-                    </label>
-                    <button class="self-end rounded-xl bg-indigo-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
-                        ＋ Adicionar
-                    </button>
-                </div>
-            </form>
-        </section>
+        <form id="add-schedule-column" method="POST" action="{{ route('project-schedules.columns.store', $selectedProject) }}" class="hidden">
+            @csrf
+            <input type="hidden" name="type" value="text">
+        </form>
 
         @foreach($columns as $column)
             <form id="move-column-left-{{ $column->id }}" method="POST" action="{{ route('project-schedules.columns.move', [$selectedProject, $column]) }}" class="hidden">
@@ -149,6 +126,7 @@
             x-data="{
                 rows: @js($initialRows),
                 customColumnKeys: @js($columns->where('is_custom', true)->pluck('column_key')->values()),
+                addingColumn: @js($errors->has('label')),
                 nextKey: 1,
                 blankRow() {
                     return {
@@ -169,6 +147,14 @@
                 removeRow(index) {
                     this.rows.splice(index, 1)
                 },
+                startAddingColumn() {
+                    this.addingColumn = true
+                    this.$nextTick(() => this.$refs.columnName?.focus())
+                },
+                cancelAddingColumn() {
+                    this.addingColumn = false
+                    if (this.$refs.columnName) this.$refs.columnName.value = ''
+                },
                 totalHours() {
                     return this.rows.reduce((total, row) => total + (Number.parseFloat(row.hours) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                 }
@@ -180,6 +166,7 @@
                     return normalized
                 })
                 if (rows.length === 0) addRow()
+                if (addingColumn) this.$nextTick(() => this.$refs.columnName?.focus())
             "
         >
             @csrf
@@ -218,7 +205,12 @@
                                         {{ $columnLetter($loop->iteration) }}
                                     </th>
                                 @endforeach
-                                <th class="sticky right-0 z-30 w-12 min-w-12 border-b border-slate-300 bg-slate-200"></th>
+                                <th
+                                    :style="addingColumn ? 'min-width:220px;width:220px' : 'min-width:48px;width:48px'"
+                                    class="sticky right-0 z-30 border-b border-slate-300 bg-slate-200 text-center transition-[width,min-width]"
+                                >
+                                    <span x-show="addingColumn" x-cloak>{{ $columnLetter($columns->count() + 1) }}</span>
+                                </th>
                             </tr>
                             <tr class="bg-[#d9ead3] text-left font-bold text-slate-800">
                                 <th class="sticky left-0 z-30 border-b border-r border-slate-300 bg-slate-200 px-2 py-3 text-center text-slate-500">#</th>
@@ -259,7 +251,48 @@
                                         </div>
                                     </th>
                                 @endforeach
-                                <th class="sticky right-0 z-30 border-b border-slate-300 bg-slate-200 px-2 py-3 text-center text-slate-500">Ação</th>
+                                <th
+                                    :style="addingColumn ? 'min-width:220px;width:220px' : 'min-width:48px;width:48px'"
+                                    :class="addingColumn ? 'bg-indigo-50' : 'bg-slate-200'"
+                                    class="sticky right-0 z-30 border-b border-slate-300 p-1.5 text-center text-slate-500 transition-[width,min-width]"
+                                >
+                                    <button
+                                        x-show="!addingColumn"
+                                        type="button"
+                                        @click="startAddingColumn()"
+                                        class="mx-auto grid h-8 w-8 place-items-center rounded-lg border border-dashed border-slate-400 bg-white text-lg font-medium text-slate-500 transition hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        title="Adicionar coluna"
+                                        aria-label="Adicionar coluna"
+                                    >＋</button>
+
+                                    <div x-show="addingColumn" x-cloak class="flex items-center gap-1">
+                                        <input
+                                            x-ref="columnName"
+                                            form="add-schedule-column"
+                                            name="label"
+                                            value="{{ old('label') }}"
+                                            maxlength="80"
+                                            required
+                                            placeholder="Nome da coluna"
+                                            @keydown.escape.prevent="cancelAddingColumn()"
+                                            class="min-w-0 flex-1 rounded-lg border-indigo-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-800 focus:border-indigo-500 focus:ring-indigo-500"
+                                        >
+                                        <button
+                                            type="submit"
+                                            form="add-schedule-column"
+                                            class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-indigo-600 text-sm font-bold text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            title="Confirmar nova coluna"
+                                            aria-label="Confirmar nova coluna"
+                                        >✓</button>
+                                        <button
+                                            type="button"
+                                            @click="cancelAddingColumn()"
+                                            class="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-base text-slate-500 hover:bg-slate-200 hover:text-slate-800"
+                                            title="Cancelar"
+                                            aria-label="Cancelar"
+                                        >×</button>
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
 
@@ -346,8 +379,13 @@
                                         </td>
                                     @endforeach
 
-                                    <td class="sticky right-0 z-10 border-b border-slate-300 bg-slate-100 p-2 text-center group-hover:bg-cyan-50">
+                                    <td
+                                        :style="addingColumn ? 'min-width:220px;width:220px' : 'min-width:48px;width:48px'"
+                                        :class="addingColumn ? 'bg-indigo-50/50' : 'bg-slate-100 group-hover:bg-cyan-50'"
+                                        class="sticky right-0 z-10 border-b border-slate-300 p-2 text-center transition-[width,min-width]"
+                                    >
                                         <button
+                                            x-show="!addingColumn"
                                             type="button"
                                             @click="removeRow(index)"
                                             class="grid h-9 w-9 place-items-center rounded-lg text-lg text-slate-400 transition hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -366,7 +404,11 @@
                                         Adicionar nova linha
                                     </button>
                                 </td>
-                                <td class="sticky right-0 z-10 border-b border-slate-300 bg-slate-100"></td>
+                                <td
+                                    :style="addingColumn ? 'min-width:220px;width:220px' : 'min-width:48px;width:48px'"
+                                    :class="addingColumn ? 'bg-indigo-50/50' : 'bg-slate-100'"
+                                    class="sticky right-0 z-10 border-b border-slate-300 transition-[width,min-width]"
+                                ></td>
                             </tr>
                         </tbody>
                     </table>
