@@ -16,7 +16,7 @@
                         <td class="p-4"><div class="flex items-center gap-3">
                             <a class="font-semibold text-cyan-700" href="{{ route('users.edit', $item) }}">Editar</a>
                             @if($item->isNot(auth()->user()))
-                                <form method="POST" action="{{ route('users.destroy', $item) }}" onsubmit="return confirm('Excluir este usuário? Os registros de horas serão preservados.')">@csrf @method('DELETE')<button class="font-semibold text-red-700">Excluir</button></form>
+                                <form method="POST" action="{{ route('users.destroy', $item) }}" data-confirm="O usuário será excluído. Os registros de horas serão preservados." data-confirm-title="Excluir usuário?" data-confirm-button="Excluir" data-confirm-variant="danger">@csrf @method('DELETE')<button class="font-semibold text-red-700">Excluir</button></form>
                             @endif
                         </div></td>
                     </tr>

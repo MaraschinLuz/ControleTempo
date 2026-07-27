@@ -7,7 +7,7 @@
     <title>{{ config('app.name', 'Controle de Horas') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-slate-50 font-sans text-slate-900 antialiased" x-data="{ menu: false }">
+<body class="bg-slate-50 font-sans text-slate-900 antialiased" x-data="appShell">
 <div class="min-h-screen lg:flex">
     <div x-show="menu" x-transition.opacity class="fixed inset-0 z-30 bg-slate-950/50 lg:hidden" @click="menu=false"></div>
     <aside :class="menu ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col bg-slate-950 text-white transition-transform lg:sticky lg:translate-x-0">
@@ -47,5 +47,6 @@
         </main>
     </div>
 </div>
+<x-confirmation-modal />
 </body>
 </html>

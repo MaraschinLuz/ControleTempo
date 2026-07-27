@@ -66,7 +66,10 @@
                 enctype="multipart/form-data"
                 class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
                 x-data="{ fileName: '' }"
-                onsubmit="return confirm('A importação substituirá as linhas atuais deste cronograma. Deseja continuar?')"
+                data-confirm="A importação substituirá todas as linhas atuais deste cronograma."
+                data-confirm-title="Importar planilha?"
+                data-confirm-button="Importar e atualizar"
+                data-confirm-variant="warning"
             >
                 @csrf
                 <div class="flex items-start gap-3">
@@ -102,18 +105,45 @@
         </form>
 
         @foreach($columns as $column)
-            <form id="move-column-left-{{ $column->id }}" method="POST" action="{{ route('project-schedules.columns.move', [$selectedProject, $column]) }}" class="hidden">
+            <form
+                id="move-column-left-{{ $column->id }}"
+                method="POST"
+                action="{{ route('project-schedules.columns.move', [$selectedProject, $column]) }}"
+                class="hidden"
+                data-confirm="A página será recarregada. Salve as alterações das linhas antes de mover a coluna."
+                data-confirm-title="Mover coluna para a esquerda?"
+                data-confirm-button="Mover coluna"
+                data-confirm-variant="warning"
+            >
                 @csrf
                 @method('PATCH')
                 <input type="hidden" name="direction" value="left">
             </form>
-            <form id="move-column-right-{{ $column->id }}" method="POST" action="{{ route('project-schedules.columns.move', [$selectedProject, $column]) }}" class="hidden">
+            <form
+                id="move-column-right-{{ $column->id }}"
+                method="POST"
+                action="{{ route('project-schedules.columns.move', [$selectedProject, $column]) }}"
+                class="hidden"
+                data-confirm="A página será recarregada. Salve as alterações das linhas antes de mover a coluna."
+                data-confirm-title="Mover coluna para a direita?"
+                data-confirm-button="Mover coluna"
+                data-confirm-variant="warning"
+            >
                 @csrf
                 @method('PATCH')
                 <input type="hidden" name="direction" value="right">
             </form>
             @if($column->is_custom)
-                <form id="delete-column-{{ $column->id }}" method="POST" action="{{ route('project-schedules.columns.destroy', [$selectedProject, $column]) }}" class="hidden">
+                <form
+                    id="delete-column-{{ $column->id }}"
+                    method="POST"
+                    action="{{ route('project-schedules.columns.destroy', [$selectedProject, $column]) }}"
+                    class="hidden"
+                    data-confirm="Os dados desta coluna deixarão de aparecer no cronograma."
+                    data-confirm-title="Remover coluna?"
+                    data-confirm-button="Remover"
+                    data-confirm-variant="danger"
+                >
                     @csrf
                     @method('DELETE')
                 </form>
@@ -223,7 +253,6 @@
                                                     type="submit"
                                                     form="move-column-left-{{ $column->id }}"
                                                     @disabled($loop->first)
-                                                    onclick="return confirm('A página será recarregada. Salve as alterações das linhas antes de mover a coluna. Continuar?')"
                                                     class="grid h-7 w-7 place-items-center rounded text-sm text-slate-600 hover:bg-white/70 disabled:cursor-not-allowed disabled:opacity-25"
                                                     title="Mover {{ $column->label }} para a esquerda"
                                                     aria-label="Mover {{ $column->label }} para a esquerda"
@@ -232,7 +261,6 @@
                                                     type="submit"
                                                     form="move-column-right-{{ $column->id }}"
                                                     @disabled($loop->last)
-                                                    onclick="return confirm('A página será recarregada. Salve as alterações das linhas antes de mover a coluna. Continuar?')"
                                                     class="grid h-7 w-7 place-items-center rounded text-sm text-slate-600 hover:bg-white/70 disabled:cursor-not-allowed disabled:opacity-25"
                                                     title="Mover {{ $column->label }} para a direita"
                                                     aria-label="Mover {{ $column->label }} para a direita"
@@ -241,7 +269,6 @@
                                                     <button
                                                         type="submit"
                                                         form="delete-column-{{ $column->id }}"
-                                                        onclick="return confirm('Remover esta coluna? Os dados dela deixarão de aparecer.')"
                                                         class="grid h-7 w-7 place-items-center rounded text-base text-red-600 hover:bg-red-50"
                                                         title="Remover {{ $column->label }}"
                                                         aria-label="Remover {{ $column->label }}"
