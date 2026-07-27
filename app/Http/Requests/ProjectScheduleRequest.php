@@ -31,6 +31,8 @@ class ProjectScheduleRequest extends FormRequest
             'rows.*.remaining_work' => ['nullable', 'string', 'max:5000'],
             'rows.*.completion_date' => ['nullable', 'date'],
             'rows.*.hours' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
+            'rows.*.custom_data' => ['sometimes', 'array', 'max:40'],
+            'rows.*.custom_data.*' => ['nullable', 'string', 'max:5000'],
         ];
     }
 

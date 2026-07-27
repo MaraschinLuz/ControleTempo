@@ -6,6 +6,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectScheduleColumnController;
 use App\Http\Controllers\ProjectScheduleController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
@@ -29,7 +30,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/registros/{time_entry}/rejeitar', [ApprovalController::class, 'reject'])->name('time-entries.reject');
     Route::get('/relatorios', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/cronograma', [ProjectScheduleController::class, 'index'])->name('project-schedules.index');
+    Route::post('/cronograma/{project}/importar', [ProjectScheduleController::class, 'import'])->name('project-schedules.import');
     Route::put('/cronograma/{project}', [ProjectScheduleController::class, 'update'])->name('project-schedules.update');
+    Route::post('/cronograma/{project}/colunas', [ProjectScheduleColumnController::class, 'store'])->name('project-schedules.columns.store');
+    Route::patch('/cronograma/{project}/colunas/{scheduleColumn}/mover', [ProjectScheduleColumnController::class, 'move'])->name('project-schedules.columns.move');
+    Route::delete('/cronograma/{project}/colunas/{scheduleColumn}', [ProjectScheduleColumnController::class, 'destroy'])->name('project-schedules.columns.destroy');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

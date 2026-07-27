@@ -1,22 +1,23 @@
 @php
-    $columns = [
-        ['key' => 'column_1', 'letter' => 'A', 'label' => 'Column 1', 'width' => '80px', 'type' => 'text'],
-        ['key' => 'column_2', 'letter' => 'B', 'label' => 'Column 2', 'width' => '70px', 'type' => 'text'],
-        ['key' => 'demand', 'letter' => 'C', 'label' => 'Demandas', 'width' => '340px', 'type' => 'textarea'],
-        ['key' => 'ai_suggestion', 'letter' => 'D', 'label' => 'Sugestão IA', 'width' => '360px', 'type' => 'textarea'],
-        ['key' => 'completion_status', 'letter' => 'E', 'label' => 'Foi feito?', 'width' => '165px', 'type' => 'status'],
-        ['key' => 'execution_date', 'letter' => 'F', 'label' => 'Data Execução', 'width' => '160px', 'type' => 'date'],
-        ['key' => 'responsible', 'letter' => 'G', 'label' => 'Responsável', 'width' => '180px', 'type' => 'text'],
-        ['key' => 'client_responsible', 'letter' => 'H', 'label' => 'Responsável Cliente', 'width' => '220px', 'type' => 'text'],
-        ['key' => 'client_contact', 'letter' => 'I', 'label' => 'Contato Cliente', 'width' => '190px', 'type' => 'text'],
-        ['key' => 'scope', 'letter' => 'J', 'label' => 'Escopo', 'width' => '220px', 'type' => 'textarea'],
-        ['key' => 'completed_demands', 'letter' => 'K', 'label' => 'Demandas realizadas', 'width' => '250px', 'type' => 'textarea'],
-        ['key' => 'remaining_work', 'letter' => 'L', 'label' => 'O que falta', 'width' => '250px', 'type' => 'textarea'],
-        ['key' => 'completion_date', 'letter' => 'M', 'label' => 'Quando finaliza', 'width' => '180px', 'type' => 'date'],
-        ['key' => 'hours', 'letter' => 'N', 'label' => 'Quantidade de horas', 'width' => '190px', 'type' => 'number'],
-    ];
-
     $initialRows = old('rows', $scheduleRows->all());
+    $registeredUserNames = $users->pluck('name');
+    $unregisteredResponsibleNames = collect($initialRows)
+        ->pluck('responsible')
+        ->filter()
+        ->diff($registeredUserNames)
+        ->unique()
+        ->values();
+    $columnLetter = function (int $number): string {
+        $letter = '';
+
+        while ($number > 0) {
+            $number--;
+            $letter = chr(65 + ($number % 26)).$letter;
+            $number = intdiv($number, 26);
+        }
+
+        return $letter;
+    };
 @endphp
 
 <x-app-layout>
@@ -58,18 +59,104 @@
             <p class="mx-auto mt-2 max-w-md text-sm text-slate-500">O cronograma de cada projeto é independente. Use o seletor acima para abrir ou começar uma nova planilha.</p>
         </section>
     @else
+        <section class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 shadow-sm">
+            <form
+                method="POST"
+                action="{{ route('project-schedules.import', $selectedProject) }}"
+                enctype="multipart/form-data"
+                class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
+                x-data="{ fileName: '' }"
+                onsubmit="return confirm('A importação substituirá as linhas atuais deste cronograma. Deseja continuar?')"
+            >
+                @csrf
+                <div class="flex items-start gap-3">
+                    <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-600 font-bold text-white">X</span>
+                    <div>
+                        <h2 class="font-bold text-emerald-950">Atualizar usando uma planilha Excel</h2>
+                        <p class="mt-1 text-sm text-emerald-800">Use o mesmo padrão do arquivo anexado, com as colunas A–N. A aba válida da planilha substituirá as linhas atuais.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <label class="cursor-pointer rounded-xl border border-emerald-300 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-800 shadow-sm transition hover:border-emerald-500">
+                        <input
+                            type="file"
+                            name="spreadsheet"
+                            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                            required
+                            class="sr-only"
+                            @change="fileName = $event.target.files[0]?.name ?? ''"
+                        >
+                        <span x-text="fileName || 'Selecionar arquivo .xlsx'"></span>
+                    </label>
+                    <button type="submit" class="rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2">
+                        Importar e atualizar
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="mb-4 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4 shadow-sm">
+            <form method="POST" action="{{ route('project-schedules.columns.store', $selectedProject) }}" class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                @csrf
+                <div>
+                    <h2 class="font-bold text-indigo-950">Adicionar coluna</h2>
+                    <p class="mt-1 text-sm text-indigo-800">A nova coluna será adicionada ao final. Use as setas no cabeçalho para ajustar sua posição.</p>
+                </div>
+                <div class="grid gap-2 sm:grid-cols-[minmax(220px,1fr)_180px_auto]">
+                    <label class="text-xs font-bold uppercase tracking-wide text-indigo-900">
+                        Nome da coluna
+                        <input name="label" value="{{ old('label') }}" maxlength="80" required placeholder="Ex.: Observações" class="mt-1 block w-full rounded-xl border-indigo-200 bg-white text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </label>
+                    <label class="text-xs font-bold uppercase tracking-wide text-indigo-900">
+                        Tipo
+                        <select name="type" class="mt-1 block w-full rounded-xl border-indigo-200 bg-white text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="text">Texto curto</option>
+                            <option value="textarea">Texto longo</option>
+                            <option value="date">Data</option>
+                            <option value="number">Número</option>
+                        </select>
+                    </label>
+                    <button class="self-end rounded-xl bg-indigo-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
+                        ＋ Adicionar
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        @foreach($columns as $column)
+            <form id="move-column-left-{{ $column->id }}" method="POST" action="{{ route('project-schedules.columns.move', [$selectedProject, $column]) }}" class="hidden">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="direction" value="left">
+            </form>
+            <form id="move-column-right-{{ $column->id }}" method="POST" action="{{ route('project-schedules.columns.move', [$selectedProject, $column]) }}" class="hidden">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="direction" value="right">
+            </form>
+            @if($column->is_custom)
+                <form id="delete-column-{{ $column->id }}" method="POST" action="{{ route('project-schedules.columns.destroy', [$selectedProject, $column]) }}" class="hidden">
+                    @csrf
+                    @method('DELETE')
+                </form>
+            @endif
+        @endforeach
+
         <form
             method="POST"
             action="{{ route('project-schedules.update', $selectedProject) }}"
             x-data="{
                 rows: @js($initialRows),
+                customColumnKeys: @js($columns->where('is_custom', true)->pluck('column_key')->values()),
                 nextKey: 1,
                 blankRow() {
                     return {
                         column_1: '', column_2: '', demand: '', ai_suggestion: '',
                         completion_status: '', execution_date: '', responsible: '',
                         client_responsible: '', client_contact: '', scope: '',
-                        completed_demands: '', remaining_work: '', completion_date: '', hours: ''
+                        completed_demands: '', remaining_work: '', completion_date: '', hours: '',
+                        custom_data: {}
                     }
                 },
                 addRow() {
@@ -87,7 +174,11 @@
                 }
             }"
             x-init="
-                rows = rows.map((row, index) => ({ ...blankRow(), ...row, _key: row._key ?? 'saved-' + index }))
+                rows = rows.map((row, index) => {
+                    const normalized = { ...blankRow(), ...row, custom_data: { ...(row.custom_data ?? {}) }, _key: row._key ?? 'saved-' + index }
+                    customColumnKeys.forEach(key => normalized.custom_data[key] ??= '')
+                    return normalized
+                })
                 if (rows.length === 0) addRow()
             "
         >
@@ -123,8 +214,8 @@
                             <tr class="h-7 bg-slate-100 text-center font-semibold text-slate-500">
                                 <th class="sticky left-0 z-30 w-12 min-w-12 border-b border-r border-slate-300 bg-slate-200"></th>
                                 @foreach($columns as $column)
-                                    <th style="min-width: {{ $column['width'] }}; width: {{ $column['width'] }}" class="border-b border-r border-slate-300 bg-slate-100 px-2 py-1">
-                                        {{ $column['letter'] }}
+                                    <th style="min-width: {{ $column->width }}px; width: {{ $column->width }}px" class="border-b border-r border-slate-300 bg-slate-100 px-2 py-1">
+                                        {{ $columnLetter($loop->iteration) }}
                                     </th>
                                 @endforeach
                                 <th class="sticky right-0 z-30 w-12 min-w-12 border-b border-slate-300 bg-slate-200"></th>
@@ -132,8 +223,40 @@
                             <tr class="bg-[#d9ead3] text-left font-bold text-slate-800">
                                 <th class="sticky left-0 z-30 border-b border-r border-slate-300 bg-slate-200 px-2 py-3 text-center text-slate-500">#</th>
                                 @foreach($columns as $column)
-                                    <th style="min-width: {{ $column['width'] }}; width: {{ $column['width'] }}" class="border-b border-r border-slate-300 bg-[#d9ead3] px-3 py-3">
-                                        {{ $column['label'] }}
+                                    <th style="min-width: {{ $column->width }}px; width: {{ $column->width }}px" class="border-b border-r border-slate-300 bg-[#d9ead3] px-2 py-2">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <span class="min-w-0 truncate px-1" title="{{ $column->label }}">{{ $column->label }}</span>
+                                            <span class="flex shrink-0 items-center gap-0.5">
+                                                <button
+                                                    type="submit"
+                                                    form="move-column-left-{{ $column->id }}"
+                                                    @disabled($loop->first)
+                                                    onclick="return confirm('A página será recarregada. Salve as alterações das linhas antes de mover a coluna. Continuar?')"
+                                                    class="grid h-7 w-7 place-items-center rounded text-sm text-slate-600 hover:bg-white/70 disabled:cursor-not-allowed disabled:opacity-25"
+                                                    title="Mover {{ $column->label }} para a esquerda"
+                                                    aria-label="Mover {{ $column->label }} para a esquerda"
+                                                >←</button>
+                                                <button
+                                                    type="submit"
+                                                    form="move-column-right-{{ $column->id }}"
+                                                    @disabled($loop->last)
+                                                    onclick="return confirm('A página será recarregada. Salve as alterações das linhas antes de mover a coluna. Continuar?')"
+                                                    class="grid h-7 w-7 place-items-center rounded text-sm text-slate-600 hover:bg-white/70 disabled:cursor-not-allowed disabled:opacity-25"
+                                                    title="Mover {{ $column->label }} para a direita"
+                                                    aria-label="Mover {{ $column->label }} para a direita"
+                                                >→</button>
+                                                @if($column->is_custom)
+                                                    <button
+                                                        type="submit"
+                                                        form="delete-column-{{ $column->id }}"
+                                                        onclick="return confirm('Remover esta coluna? Os dados dela deixarão de aparecer.')"
+                                                        class="grid h-7 w-7 place-items-center rounded text-base text-red-600 hover:bg-red-50"
+                                                        title="Remover {{ $column->label }}"
+                                                        aria-label="Remover {{ $column->label }}"
+                                                    >×</button>
+                                                @endif
+                                            </span>
+                                        </div>
                                     </th>
                                 @endforeach
                                 <th class="sticky right-0 z-30 border-b border-slate-300 bg-slate-200 px-2 py-3 text-center text-slate-500">Ação</th>
@@ -146,19 +269,24 @@
                                     <th class="sticky left-0 z-10 border-b border-r border-slate-300 bg-slate-100 px-2 py-5 text-center font-semibold text-slate-500 group-hover:bg-cyan-50" x-text="index + 1"></th>
 
                                     @foreach($columns as $column)
-                                        <td style="min-width: {{ $column['width'] }}; width: {{ $column['width'] }}" class="border-b border-r border-slate-300 bg-white p-0 group-hover:bg-cyan-50/20">
-                                            @if($column['type'] === 'textarea')
+                                        @php
+                                            $columnKey = $column->column_key;
+                                            $inputName = $column->is_custom ? "custom_data][{$columnKey}" : $columnKey;
+                                            $model = $column->is_custom ? "row.custom_data['{$columnKey}']" : "row.{$columnKey}";
+                                        @endphp
+                                        <td style="min-width: {{ $column->width }}px; width: {{ $column->width }}px" class="border-b border-r border-slate-300 bg-white p-0 group-hover:bg-cyan-50/20">
+                                            @if($column->type === 'textarea')
                                                 <textarea
-                                                    :name="'rows[' + index + '][{{ $column['key'] }}]'"
-                                                    x-model="row.{{ $column['key'] }}"
+                                                    :name="'rows[' + index + '][{{ $inputName }}]'"
+                                                    x-model="{{ $model }}"
                                                     rows="2"
                                                     class="block min-h-16 w-full resize-y border-0 bg-transparent px-3 py-2 text-xs leading-5 text-slate-800 placeholder:text-slate-300 focus:bg-cyan-50 focus:ring-2 focus:ring-inset focus:ring-cyan-500"
                                                     placeholder="Digite aqui"
                                                 ></textarea>
-                                            @elseif($column['type'] === 'status')
+                                            @elseif($column->type === 'status')
                                                 <select
-                                                    :name="'rows[' + index + '][{{ $column['key'] }}]'"
-                                                    x-model="row.{{ $column['key'] }}"
+                                                    :name="'rows[' + index + '][{{ $inputName }}]'"
+                                                    x-model="{{ $model }}"
                                                     class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-xs font-semibold focus:bg-cyan-50 focus:ring-2 focus:ring-inset focus:ring-cyan-500"
                                                     :class="{
                                                         'text-emerald-700': row.completion_status === 'Sim',
@@ -173,30 +301,44 @@
                                                     <option value="Em andamento">Em andamento</option>
                                                     <option value="Agendado">Agendado</option>
                                                 </select>
-                                            @elseif($column['type'] === 'date')
+                                            @elseif($column->type === 'user')
+                                                <select
+                                                    :name="'rows[' + index + '][{{ $inputName }}]'"
+                                                    x-model="{{ $model }}"
+                                                    class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-xs font-semibold text-slate-700 focus:bg-cyan-50 focus:ring-2 focus:ring-inset focus:ring-cyan-500"
+                                                >
+                                                    <option value="">Selecione o responsável</option>
+                                                    @foreach($users as $user)
+                                                        <option value="{{ $user->name }}">
+                                                            {{ $user->name }}@if(! $user->active) · Inativo @endif
+                                                        </option>
+                                                    @endforeach
+                                                    @foreach($unregisteredResponsibleNames as $responsibleName)
+                                                        <option value="{{ $responsibleName }}">{{ $responsibleName }} · Não cadastrado</option>
+                                                    @endforeach
+                                                </select>
+                                            @elseif($column->type === 'date')
                                                 <input
                                                     type="date"
-                                                    :name="'rows[' + index + '][{{ $column['key'] }}]'"
-                                                    x-model="row.{{ $column['key'] }}"
+                                                    :name="'rows[' + index + '][{{ $inputName }}]'"
+                                                    x-model="{{ $model }}"
                                                     class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-xs focus:bg-cyan-50 focus:ring-2 focus:ring-inset focus:ring-cyan-500"
                                                 >
-                                            @elseif($column['type'] === 'number')
+                                            @elseif($column->type === 'number')
                                                 <input
                                                     type="number"
-                                                    min="0"
-                                                    max="999999.99"
-                                                    step="0.25"
-                                                    :name="'rows[' + index + '][{{ $column['key'] }}]'"
-                                                    x-model="row.{{ $column['key'] }}"
+                                                    @if($columnKey === 'hours') min="0" max="999999.99" step="0.25" @else step="any" @endif
+                                                    :name="'rows[' + index + '][{{ $inputName }}]'"
+                                                    x-model="{{ $model }}"
                                                     class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-right text-xs tabular-nums focus:bg-cyan-50 focus:ring-2 focus:ring-inset focus:ring-cyan-500"
                                                     placeholder="0,00"
                                                 >
                                             @else
                                                 <input
                                                     type="text"
-                                                    :name="'rows[' + index + '][{{ $column['key'] }}]'"
-                                                    x-model="row.{{ $column['key'] }}"
-                                                    @if($column['key'] === 'column_1') data-first-cell @endif
+                                                    :name="'rows[' + index + '][{{ $inputName }}]'"
+                                                    x-model="{{ $model }}"
+                                                    @if($loop->first) data-first-cell @endif
                                                     class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-xs focus:bg-cyan-50 focus:ring-2 focus:ring-inset focus:ring-cyan-500"
                                                     placeholder="Digite aqui"
                                                 >

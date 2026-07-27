@@ -22,6 +22,7 @@ class ProjectScheduleRow extends Model
         'remaining_work',
         'completion_date',
         'hours',
+        'custom_data',
     ];
 
     protected function casts(): array
@@ -30,6 +31,7 @@ class ProjectScheduleRow extends Model
             'execution_date' => 'date',
             'completion_date' => 'date',
             'hours' => 'decimal:2',
+            'custom_data' => 'array',
         ];
     }
 
