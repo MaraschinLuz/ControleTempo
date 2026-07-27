@@ -51,6 +51,11 @@ class TimeEntryWorkflowTest extends TestCase
         $this->assertDatabaseHas('time_entry_audits', ['time_entry_id' => $entry->id, 'action' => 'created']);
     }
 
+    public function test_postgres_uses_the_same_timezone_as_the_application(): void
+    {
+        $this->assertSame(config('app.timezone'), config('database.connections.pgsql.timezone'));
+    }
+
     public function test_user_stops_a_timer_and_server_calculates_duration(): void
     {
         $entry = $this->runningEntry(now()->subMinutes(75));
@@ -70,6 +75,17 @@ class TimeEntryWorkflowTest extends TestCase
     {
         $this->runningEntry(now()->subMinutes(10));
         $this->actingAs($this->user)->get(route('dashboard'))->assertOk()->assertSee('EM ANDAMENTO')->assertSee($this->project->name);
+    }
+
+    public function test_timezone_migration_recovers_an_already_running_timer(): void
+    {
+        $entry = $this->runningEntry(now()->subHours(3));
+        $migration = require database_path('migrations/2026_07_27_000001_fix_running_timer_start_timezone.php');
+
+        $migration->up();
+        $entry->refresh();
+
+        $this->assertSame($entry->created_at->timestamp, $entry->started_at->timestamp);
     }
 
     public function test_valid_manual_entry_is_created_and_duration_is_calculated(): void

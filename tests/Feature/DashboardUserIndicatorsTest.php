@@ -40,7 +40,11 @@ class DashboardUserIndicatorsTest extends TestCase
 
         $response = $this->actingAs($admin)->get(route('dashboard'));
 
-        $response->assertOk()->assertSee('Indicadores por usuário')->assertDontSee('Usuário inativo');
+        $response->assertOk()
+            ->assertSee('Indicadores por usuário')
+            ->assertDontSee('Usuário inativo')
+            ->assertDontSee('<span class="block text-xs text-slate-500">Administrador</span>', false)
+            ->assertDontSee('<span class="block text-xs text-slate-500">Colaborador</span>', false);
         $response->assertViewHas('userIndicators', function ($rows) use ($alice, $bob) {
             $aliceTotals = $rows->firstWhere('id', $alice->id);
             $bobTotals = $rows->firstWhere('id', $bob->id);

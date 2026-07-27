@@ -32,7 +32,6 @@
                             <tr class="border-t border-slate-100 hover:bg-slate-50/70">
                                 <td class="p-4">
                                     <a href="{{ route('dashboard', ['user_id' => $indicator->id]) }}" class="font-semibold text-slate-900 hover:text-cyan-700">{{ $indicator->name }}</a>
-                                    <span class="block text-xs text-slate-500">{{ $indicator->role->label() }}</span>
                                 </td>
                                 <td class="p-4 font-bold text-cyan-700"><x-duration :seconds="$indicator->today_seconds ?? 0" /></td>
                                 <td class="p-4 font-bold text-indigo-700"><x-duration :seconds="$indicator->week_seconds ?? 0" /></td>

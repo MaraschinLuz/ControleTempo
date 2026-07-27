@@ -20,6 +20,8 @@ services:
         sync: false
       - key: APP_URL
         sync: false
+      - key: APP_TIMEZONE
+        value: America/Sao_Paulo
       - key: APP_LOCALE
         value: pt_BR
       - key: APP_FALLBACK_LOCALE
@@ -32,6 +34,8 @@ services:
         value: pgsql
       - key: DB_URL
         sync: false
+      - key: DB_TIMEZONE
+        value: America/Sao_Paulo
       - key: SESSION_DRIVER
         value: database
       - key: CACHE_STORE
