@@ -21,6 +21,7 @@
             <x-nav-link-sidebar :href="route('time-entries.create')" :active="request()->routeIs('time-entries.create')">Adicionar horas</x-nav-link-sidebar>
             <x-nav-link-sidebar :href="route('reports.index')" :active="request()->routeIs('reports.*')">Relatórios</x-nav-link-sidebar>
             <x-nav-link-sidebar :href="route('project-schedules.index')" :active="request()->routeIs('project-schedules.*')">Cronograma</x-nav-link-sidebar>
+            <x-nav-link-sidebar :href="route('demands.index')" :active="request()->routeIs('demands.*')">Demandas</x-nav-link-sidebar>
             @if(auth()->user()->isAdmin())
                 <p class="px-3 pb-1 pt-6 text-xs font-bold uppercase tracking-widest text-slate-500">Administração</p>
                 <x-nav-link-sidebar :href="route('users.index')" :active="request()->routeIs('users.*')">Usuários</x-nav-link-sidebar>

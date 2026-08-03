@@ -49,6 +49,11 @@ class User extends Authenticatable
         return $this->hasMany(TimeEntry::class, 'approved_by');
     }
 
+    public function demands()
+    {
+        return $this->hasMany(Demand::class);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === UserRole::Admin;
