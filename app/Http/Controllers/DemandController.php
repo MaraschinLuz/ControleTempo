@@ -20,32 +20,24 @@ class DemandController extends Controller
         $users = $request->user()->isManagerOrAdmin()
             ? User::query()->where('active', true)->orderBy('name')->get(['id', 'name'])
             : collect([$request->user()]);
-
-        $selectedUser = $request->user();
-
-        if ($request->user()->isManagerOrAdmin() && $request->filled('user_id')) {
-            $selectedUser = User::query()->where('active', true)->findOrFail($request->integer('user_id'));
-        }
-
-        $demands = Demand::query()
-            ->with(['project.client'])
-            ->whereBelongsTo($selectedUser)
-            ->when($request->filled('project_id'), fn ($query) => $query->where('project_id', $request->integer('project_id')))
-            ->when($request->filled('priority'), fn ($query) => $query->where('priority', $request->string('priority')->toString()))
-            ->when($request->filled('search'), function ($query) use ($request) {
-                $search = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $request->string('search')->trim()).'%';
-
-                $query->where(fn ($query) => $query
-                    ->where('title', 'like', $search)
-                    ->orWhere('description', 'like', $search));
-            })
-            ->orderBy('position')
-            ->orderByDesc('created_at')
-            ->get();
-
+        $selectedUser = $this->selectedUser($request);
+        $demands = $this->filteredDemands($request, $selectedUser);
         $projects = Project::query()->with('client')->orderBy('name')->get();
 
         return view('demands.index', compact('demands', 'projects', 'selectedUser', 'users'));
+    }
+
+    public function share(Request $request)
+    {
+        Gate::authorize('viewAny', Demand::class);
+
+        $selectedUser = $this->selectedUser($request);
+        $demands = $this->filteredDemands($request, $selectedUser);
+        $selectedProject = $request->filled('project_id')
+            ? Project::query()->with('client')->find($request->integer('project_id'))
+            : null;
+
+        return view('demands.share', compact('demands', 'selectedProject', 'selectedUser'));
     }
 
     public function store(StoreDemandRequest $request)
@@ -106,5 +98,33 @@ class DemandController extends Controller
             ->where('user_id', $userId)
             ->where('status', $status)
             ->max('position') + 1;
+    }
+
+    private function selectedUser(Request $request): User
+    {
+        if ($request->user()->isManagerOrAdmin() && $request->filled('user_id')) {
+            return User::query()->where('active', true)->findOrFail($request->integer('user_id'));
+        }
+
+        return $request->user();
+    }
+
+    private function filteredDemands(Request $request, User $selectedUser)
+    {
+        return Demand::query()
+            ->with(['project.client'])
+            ->whereBelongsTo($selectedUser)
+            ->when($request->filled('project_id'), fn ($query) => $query->where('project_id', $request->integer('project_id')))
+            ->when($request->filled('priority'), fn ($query) => $query->where('priority', $request->string('priority')->toString()))
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $request->string('search')->trim()).'%';
+
+                $query->where(fn ($query) => $query
+                    ->where('title', 'like', $search)
+                    ->orWhere('description', 'like', $search));
+            })
+            ->orderBy('position')
+            ->orderByDesc('created_at')
+            ->get();
     }
 }

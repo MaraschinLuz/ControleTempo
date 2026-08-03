@@ -27,6 +27,13 @@
         'in_progress' => ['Em andamento', 'Trabalho ativo', 'bg-cyan-400', 'text-cyan-700', 'border-cyan-200'],
         'completed' => ['Concluída', 'Trabalho finalizado', 'bg-emerald-400', 'text-emerald-700', 'border-emerald-200'],
     ];
+
+    $shareQuery = array_filter([
+        'user_id' => $selectedUser->id,
+        'project_id' => request('project_id'),
+        'priority' => request('priority'),
+        'search' => request('search'),
+    ], fn ($value) => filled($value));
 @endphp
 
 <x-app-layout>
@@ -37,9 +44,14 @@
                 <h1 class="mt-1 text-2xl font-bold text-slate-950">Quadro de {{ $selectedUser->name }}</h1>
                 <p class="mt-1 text-sm text-slate-500">Organize as entregas por etapa, projeto e prioridade.</p>
             </div>
-            <button type="button" @click="$dispatch('open-demand-modal')" class="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 shadow-sm transition hover:bg-cyan-300">
-                + Nova demanda
-            </button>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('demands.share', $shareQuery) }}" target="_blank" rel="noopener" class="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:border-cyan-400 hover:text-cyan-700">
+                    Compartilhar quadro
+                </a>
+                <button type="button" @click="$dispatch('open-demand-modal')" class="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 shadow-sm transition hover:bg-cyan-300">
+                    + Nova demanda
+                </button>
+            </div>
         </div>
     </x-slot>
 

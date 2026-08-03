@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/registros/{time_entry}/rejeitar', [ApprovalController::class, 'reject'])->name('time-entries.reject');
     Route::get('/relatorios', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/demandas', [DemandController::class, 'index'])->name('demands.index');
+    Route::get('/demandas/compartilhar', [DemandController::class, 'share'])->name('demands.share');
     Route::post('/demandas', [DemandController::class, 'store'])->name('demands.store');
     Route::put('/demandas/{demand}', [DemandController::class, 'update'])->name('demands.update');
     Route::patch('/demandas/{demand}/status', [DemandController::class, 'updateStatus'])->name('demands.status');

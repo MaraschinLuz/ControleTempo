@@ -41,6 +41,40 @@ class DemandWorkflowTest extends TestCase
             ->assertSee('Demanda acompanhada');
     }
 
+    public function test_share_view_preserves_the_individual_board_and_print_context(): void
+    {
+        $manager = User::factory()->manager()->create();
+        $user = User::factory()->create();
+        $project = Project::factory()->create(['name' => 'Projeto compartilhado']);
+        Demand::factory()->for($user)->for($project)->create([
+            'title' => 'Validar entrega com o cliente',
+            'priority' => 'high',
+        ]);
+
+        $this->actingAs($manager)
+            ->get(route('demands.share', ['user_id' => $user->id, 'project_id' => $project->id]))
+            ->assertOk()
+            ->assertSee('Resumo para compartilhar')
+            ->assertSee($user->name)
+            ->assertSee('Validar entrega com o cliente')
+            ->assertSee('Projeto compartilhado')
+            ->assertSee('Imprimir ou salvar em PDF');
+    }
+
+    public function test_collaborator_cannot_share_another_users_board(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        Demand::factory()->for($user)->create(['title' => 'Demanda própria']);
+        Demand::factory()->for($otherUser)->create(['title' => 'Demanda confidencial']);
+
+        $this->actingAs($user)
+            ->get(route('demands.share', ['user_id' => $otherUser->id]))
+            ->assertOk()
+            ->assertSee('Demanda própria')
+            ->assertDontSee('Demanda confidencial');
+    }
+
     public function test_collaborator_can_create_a_demand_with_project_and_priority(): void
     {
         $user = User::factory()->create();
