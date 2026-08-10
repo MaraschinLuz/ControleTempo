@@ -116,6 +116,7 @@ class DemandController extends Controller
             ->whereBelongsTo($selectedUser)
             ->when($request->filled('project_id'), fn ($query) => $query->where('project_id', $request->integer('project_id')))
             ->when($request->filled('priority'), fn ($query) => $query->where('priority', $request->string('priority')->toString()))
+            ->when($request->filled('due_date'), fn ($query) => $query->whereDate('due_date', $request->date('due_date')))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $request->string('search')->trim()).'%';
 

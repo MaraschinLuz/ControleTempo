@@ -32,6 +32,7 @@
         'user_id' => $selectedUser->id,
         'project_id' => request('project_id'),
         'priority' => request('priority'),
+        'due_date' => request('due_date'),
         'search' => request('search'),
     ], fn ($value) => filled($value));
 @endphp
@@ -70,7 +71,7 @@
         @open-demand-modal.window="openCreate()"
     >
         <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <form method="GET" action="{{ route('demands.index') }}" class="grid gap-3 md:grid-cols-2 xl:grid-cols-[1.4fr_1fr_1fr_1fr_auto] xl:items-end">
+            <form method="GET" action="{{ route('demands.index') }}" class="grid gap-3 md:grid-cols-2 xl:grid-cols-[1.4fr_1fr_1fr_1fr_1fr_auto] xl:items-end">
                 @if(auth()->user()->isManagerOrAdmin())
                     <label class="text-xs font-bold uppercase tracking-wide text-slate-500">
                         Página do usuário
@@ -103,12 +104,16 @@
                     </select>
                 </label>
                 <label class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Data prevista de término
+                    <input name="due_date" type="date" value="{{ request('due_date') }}" class="mt-1 block w-full rounded-xl border-slate-300 text-sm">
+                </label>
+                <label class="text-xs font-bold uppercase tracking-wide text-slate-500">
                     Buscar
                     <input name="search" value="{{ request('search') }}" placeholder="Título ou descrição" class="mt-1 block w-full rounded-xl border-slate-300 text-sm">
                 </label>
                 <div class="flex gap-2">
                     <button class="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white">Filtrar</button>
-                    @if(request()->hasAny(['project_id', 'priority', 'search']))
+                    @if(request()->hasAny(['project_id', 'priority', 'due_date', 'search']))
                         <a href="{{ route('demands.index', ['user_id' => $selectedUser->id]) }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-600">Limpar</a>
                     @endif
                 </div>

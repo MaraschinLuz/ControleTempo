@@ -61,6 +61,31 @@ class DemandWorkflowTest extends TestCase
             ->assertSee('Imprimir ou salvar em PDF');
     }
 
+    public function test_demands_can_be_filtered_by_expected_completion_date(): void
+    {
+        $user = User::factory()->create();
+        Demand::factory()->for($user)->create([
+            'title' => 'Demanda da data selecionada',
+            'due_date' => '2026-08-20',
+        ]);
+        Demand::factory()->for($user)->create([
+            'title' => 'Demanda de outra data',
+            'due_date' => '2026-08-21',
+        ]);
+        Demand::factory()->for($user)->create([
+            'title' => 'Demanda sem data',
+            'due_date' => null,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('demands.index', ['due_date' => '2026-08-20']))
+            ->assertOk()
+            ->assertSee('Demanda da data selecionada')
+            ->assertDontSee('Demanda de outra data')
+            ->assertDontSee('Demanda sem data')
+            ->assertSee('value="2026-08-20"', false);
+    }
+
     public function test_collaborator_cannot_share_another_users_board(): void
     {
         $user = User::factory()->create();
