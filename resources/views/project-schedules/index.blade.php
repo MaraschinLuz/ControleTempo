@@ -24,14 +24,14 @@
     <x-slot name="header">
         <div class="flex flex-col justify-between gap-4 xl:flex-row xl:items-end">
             <div>
-                <p class="text-sm font-medium text-cyan-700">Planejamento de projetos</p>
+                <p class="text-sm font-medium text-brand-700">Planejamento de projetos</p>
                 <h1 class="text-2xl font-bold">Cronograma</h1>
                 <p class="mt-1 text-sm text-slate-500">Organize as etapas do projeto em uma planilha compartilhada.</p>
             </div>
 
             <form method="GET" action="{{ route('project-schedules.index') }}" class="w-full xl:w-96">
                 <label for="project_id" class="text-xs font-bold uppercase tracking-wide text-slate-500">Projeto</label>
-                <select id="project_id" name="project_id" onchange="this.form.submit()" class="mt-1 block w-full rounded-xl border-slate-300 bg-white text-sm shadow-sm focus:border-cyan-500 focus:ring-cyan-500">
+                <select id="project_id" name="project_id" onchange="this.form.submit()" class="mt-1 block w-full rounded-xl border-slate-300 bg-white text-sm shadow-sm focus:border-brand-500 focus:ring-brand-500">
                     <option value="">Selecione um projeto</option>
                     @foreach($projects as $project)
                         <option value="{{ $project->id }}" @selected($selectedProject?->is($project))>
@@ -45,16 +45,16 @@
 
     @if($projects->isEmpty())
         <section class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
-            <div class="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-xl">▦</div>
+            <div class="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-canvas text-xl">▦</div>
             <h2 class="mt-4 text-lg font-bold">Nenhum projeto disponível</h2>
             <p class="mt-1 text-sm text-slate-500">Cadastre um projeto antes de criar o cronograma.</p>
             @if(auth()->user()->isAdmin())
-                <a href="{{ route('projects.create') }}" class="mt-5 inline-flex rounded-xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950">Cadastrar projeto</a>
+                <a href="{{ route('projects.create') }}" class="mt-5 inline-flex rounded-xl bg-brand-500 px-5 py-3 text-sm font-bold text-white">Cadastrar projeto</a>
             @endif
         </section>
     @elseif(! $selectedProject)
         <section class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-20 text-center">
-            <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-cyan-50 text-2xl text-cyan-700">▦</div>
+            <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-brand-50 text-2xl text-brand-700">▦</div>
             <h2 class="mt-4 text-xl font-bold">Selecione um projeto</h2>
             <p class="mx-auto mt-2 max-w-md text-sm text-slate-500">O cronograma de cada projeto é independente. Use o seletor acima para abrir ou começar uma nova planilha.</p>
         </section>
@@ -202,36 +202,36 @@
             @csrf
             @method('PUT')
 
-            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div class="flex flex-col gap-4 border-b border-slate-200 bg-white px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+            <section class="overflow-hidden rounded-2xl border border-canvas bg-white shadow-sm">
+                <div class="flex flex-col gap-4 border-b border-canvas bg-white px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
                     <div class="min-w-0">
-                        <p class="truncate font-bold text-slate-900">{{ $selectedProject->name }}</p>
+                        <p class="truncate font-bold text-ink">{{ $selectedProject->name }}</p>
                         <p class="truncate text-sm text-slate-500">{{ $selectedProject->client->name }}</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-3">
-                        <span class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600">
+                        <span class="rounded-lg bg-canvas px-3 py-2 text-xs font-semibold text-slate-600">
                             <span x-text="rows.length"></span> <span x-text="rows.length === 1 ? 'linha' : 'linhas'"></span>
                         </span>
                         <span class="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
                             Total: <span x-text="totalHours()"></span>h
                         </span>
-                        <button type="submit" class="rounded-xl bg-cyan-500 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-sm transition hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2">
+                        <button type="submit" class="rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-bold shadow-sm transition hover:bg-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 text-white">
                             Salvar cronograma
                         </button>
                     </div>
                 </div>
 
-                <div class="border-b border-slate-200 bg-slate-50 px-5 py-2 text-xs text-slate-500">
+                <div class="border-b border-canvas bg-slate-50 px-5 py-2 text-xs text-slate-500">
                     Clique em uma célula para editar. A planilha pode ser rolada horizontalmente.
                 </div>
 
                 <div class="max-h-[68vh] overflow-auto">
                     <table class="border-separate border-spacing-0 text-xs">
                         <thead class="sticky top-0 z-20">
-                            <tr class="h-7 bg-slate-100 text-center font-semibold text-slate-500">
+                            <tr class="h-7 bg-canvas text-center font-semibold text-slate-500">
                                 <th class="sticky left-0 z-30 w-12 min-w-12 border-b border-r border-slate-300 bg-slate-200"></th>
                                 @foreach($columns as $column)
-                                    <th style="min-width: {{ $column->width }}px; width: {{ $column->width }}px" class="border-b border-r border-slate-300 bg-slate-100 px-2 py-1">
+                                    <th style="min-width: {{ $column->width }}px; width: {{ $column->width }}px" class="border-b border-r border-slate-300 bg-canvas px-2 py-1">
                                         {{ $columnLetter($loop->iteration) }}
                                     </th>
                                 @endforeach
@@ -280,14 +280,14 @@
                                 @endforeach
                                 <th
                                     :style="addingColumn ? 'min-width:220px;width:220px' : 'min-width:48px;width:48px'"
-                                    :class="addingColumn ? 'bg-indigo-50' : 'bg-slate-200'"
+                                    :class="addingColumn ? 'bg-brand-50' : 'bg-slate-200'"
                                     class="sticky right-0 z-30 border-b border-slate-300 p-1.5 text-center text-slate-500 transition-[width,min-width]"
                                 >
                                     <button
                                         x-show="!addingColumn"
                                         type="button"
                                         @click="startAddingColumn()"
-                                        class="mx-auto grid h-8 w-8 place-items-center rounded-lg border border-dashed border-slate-400 bg-white text-lg font-medium text-slate-500 transition hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        class="mx-auto grid h-8 w-8 place-items-center rounded-lg border border-dashed border-slate-400 bg-white text-lg font-medium text-slate-500 transition hover:border-brand-500 hover:bg-brand-50 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
                                         title="Adicionar coluna"
                                         aria-label="Adicionar coluna"
                                     >＋</button>
@@ -302,12 +302,12 @@
                                             required
                                             placeholder="Nome da coluna"
                                             @keydown.escape.prevent="cancelAddingColumn()"
-                                            class="min-w-0 flex-1 rounded-lg border-indigo-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-800 focus:border-indigo-500 focus:ring-indigo-500"
+                                            class="min-w-0 flex-1 rounded-lg border-brand-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-800 focus:border-brand-500 focus:ring-brand-500"
                                         >
                                         <button
                                             type="submit"
                                             form="add-schedule-column"
-                                            class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-indigo-600 text-sm font-bold text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand-600 text-sm font-bold hover:bg-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500 text-white"
                                             title="Confirmar nova coluna"
                                             aria-label="Confirmar nova coluna"
                                         >✓</button>
@@ -325,8 +325,8 @@
 
                         <tbody>
                             <template x-for="(row, index) in rows" :key="row._key">
-                                <tr class="group align-top hover:bg-cyan-50/30">
-                                    <th class="sticky left-0 z-10 border-b border-r border-slate-300 bg-slate-100 px-2 py-5 text-center font-semibold text-slate-500 group-hover:bg-cyan-50" x-text="index + 1"></th>
+                                <tr class="group align-top hover:bg-brand-50/30">
+                                    <th class="sticky left-0 z-10 border-b border-r border-slate-300 bg-canvas px-2 py-5 text-center font-semibold text-slate-500 group-hover:bg-brand-50" x-text="index + 1"></th>
 
                                     @foreach($columns as $column)
                                         @php
@@ -334,25 +334,25 @@
                                             $inputName = $column->is_custom ? "custom_data][{$columnKey}" : $columnKey;
                                             $model = $column->is_custom ? "row.custom_data['{$columnKey}']" : "row.{$columnKey}";
                                         @endphp
-                                        <td style="min-width: {{ $column->width }}px; width: {{ $column->width }}px" class="border-b border-r border-slate-300 bg-white p-0 group-hover:bg-cyan-50/20">
+                                        <td style="min-width: {{ $column->width }}px; width: {{ $column->width }}px" class="border-b border-r border-slate-300 bg-white p-0 group-hover:bg-brand-50/20">
                                             @if($column->type === 'textarea')
                                                 <textarea
                                                     :name="'rows[' + index + '][{{ $inputName }}]'"
                                                     x-model="{{ $model }}"
                                                     rows="2"
-                                                    class="block min-h-16 w-full resize-y border-0 bg-transparent px-3 py-2 text-xs leading-5 text-slate-800 placeholder:text-slate-300 focus:bg-cyan-50 focus:ring-2 focus:ring-inset focus:ring-cyan-500"
+                                                    class="block min-h-16 w-full resize-y border-0 bg-transparent px-3 py-2 text-xs leading-5 text-slate-800 placeholder:text-slate-300 focus:bg-brand-50 focus:ring-2 focus:ring-inset focus:ring-brand-500"
                                                     placeholder="Digite aqui"
                                                 ></textarea>
                                             @elseif($column->type === 'status')
                                                 <select
                                                     :name="'rows[' + index + '][{{ $inputName }}]'"
                                                     x-model="{{ $model }}"
-                                                    class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-xs font-semibold focus:bg-cyan-50 focus:ring-2 focus:ring-inset focus:ring-cyan-500"
+                                                    class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-xs font-semibold focus:bg-brand-50 focus:ring-2 focus:ring-inset focus:ring-brand-500"
                                                     :class="{
                                                         'text-emerald-700': row.completion_status === 'Sim',
                                                         'text-red-700': row.completion_status === 'Não',
                                                         'text-amber-700': row.completion_status === 'Em andamento',
-                                                        'text-indigo-700': row.completion_status === 'Agendado'
+                                                        'text-brand-700': row.completion_status === 'Agendado'
                                                     }"
                                                 >
                                                     <option value="">Selecione</option>
@@ -365,7 +365,7 @@
                                                 <select
                                                     :name="'rows[' + index + '][{{ $inputName }}]'"
                                                     x-model="{{ $model }}"
-                                                    class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-xs font-semibold text-slate-700 focus:bg-cyan-50 focus:ring-2 focus:ring-inset focus:ring-cyan-500"
+                                                    class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-xs font-semibold text-slate-700 focus:bg-brand-50 focus:ring-2 focus:ring-inset focus:ring-brand-500"
                                                 >
                                                     <option value="">Selecione o responsável</option>
                                                     @foreach($users as $user)
@@ -382,7 +382,7 @@
                                                     type="date"
                                                     :name="'rows[' + index + '][{{ $inputName }}]'"
                                                     x-model="{{ $model }}"
-                                                    class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-xs focus:bg-cyan-50 focus:ring-2 focus:ring-inset focus:ring-cyan-500"
+                                                    class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-xs focus:bg-brand-50 focus:ring-2 focus:ring-inset focus:ring-brand-500"
                                                 >
                                             @elseif($column->type === 'number')
                                                 <input
@@ -390,7 +390,7 @@
                                                     @if($columnKey === 'hours') min="0" max="999999.99" step="0.25" @else step="any" @endif
                                                     :name="'rows[' + index + '][{{ $inputName }}]'"
                                                     x-model="{{ $model }}"
-                                                    class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-right text-xs tabular-nums focus:bg-cyan-50 focus:ring-2 focus:ring-inset focus:ring-cyan-500"
+                                                    class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-right text-xs tabular-nums focus:bg-brand-50 focus:ring-2 focus:ring-inset focus:ring-brand-500"
                                                     placeholder="0,00"
                                                 >
                                             @else
@@ -399,7 +399,7 @@
                                                     :name="'rows[' + index + '][{{ $inputName }}]'"
                                                     x-model="{{ $model }}"
                                                     @if($loop->first) data-first-cell @endif
-                                                    class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-xs focus:bg-cyan-50 focus:ring-2 focus:ring-inset focus:ring-cyan-500"
+                                                    class="block min-h-16 w-full border-0 bg-transparent px-3 py-2 text-xs focus:bg-brand-50 focus:ring-2 focus:ring-inset focus:ring-brand-500"
                                                     placeholder="Digite aqui"
                                                 >
                                             @endif
@@ -408,7 +408,7 @@
 
                                     <td
                                         :style="addingColumn ? 'min-width:220px;width:220px' : 'min-width:48px;width:48px'"
-                                        :class="addingColumn ? 'bg-indigo-50/50' : 'bg-slate-100 group-hover:bg-cyan-50'"
+                                        :class="addingColumn ? 'bg-brand-50/50' : 'bg-canvas group-hover:bg-brand-50'"
                                         class="sticky right-0 z-10 border-b border-slate-300 p-2 text-center transition-[width,min-width]"
                                     >
                                         <button
@@ -424,16 +424,16 @@
                             </template>
 
                             <tr>
-                                <th class="sticky left-0 z-10 border-b border-r border-slate-300 bg-slate-100"></th>
+                                <th class="sticky left-0 z-10 border-b border-r border-slate-300 bg-canvas"></th>
                                 <td colspan="{{ count($columns) }}" class="border-b border-r border-slate-300 bg-white p-2">
-                                    <button type="button" @click="addRow()" class="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-cyan-300 bg-cyan-50/60 px-4 py-3 text-sm font-bold text-cyan-800 transition hover:border-cyan-500 hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                                    <button type="button" @click="addRow()" class="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-brand-300 bg-brand-50/60 px-4 py-3 text-sm font-bold text-brand-800 transition hover:border-brand-500 hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-brand-500">
                                         <span class="text-lg leading-none">＋</span>
                                         Adicionar nova linha
                                     </button>
                                 </td>
                                 <td
                                     :style="addingColumn ? 'min-width:220px;width:220px' : 'min-width:48px;width:48px'"
-                                    :class="addingColumn ? 'bg-indigo-50/50' : 'bg-slate-100'"
+                                    :class="addingColumn ? 'bg-brand-50/50' : 'bg-canvas'"
                                     class="sticky right-0 z-10 border-b border-slate-300 transition-[width,min-width]"
                                 ></td>
                             </tr>
@@ -443,7 +443,7 @@
             </section>
 
             <div class="mt-4 flex justify-end">
-                <button type="submit" class="rounded-xl bg-slate-950 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2">
+                <button type="submit" class="rounded-xl bg-ink px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2">
                     Salvar cronograma
                 </button>
             </div>

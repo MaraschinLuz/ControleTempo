@@ -17,7 +17,7 @@
         x-transition:leave="ease-in duration-150"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"
+        class="fixed inset-0 bg-ink/60 backdrop-blur-sm"
         x-on:click="cancelConfirmation()"
         aria-hidden="true"
     ></div>
@@ -31,7 +31,7 @@
             x-transition:leave="ease-in duration-150"
             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
             x-transition:leave-end="opacity-0 translate-y-3 scale-95"
-            class="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+            class="relative w-full max-w-md overflow-hidden rounded-2xl border border-canvas bg-white shadow-2xl"
             x-on:click.stop
         >
             <div class="p-6">
@@ -46,18 +46,18 @@
                         <span x-text="confirmationVariant === 'danger' ? '!' : '?'"></span>
                     </div>
                     <div class="min-w-0">
-                        <h2 id="confirmation-modal-title" class="text-lg font-bold text-slate-950" x-text="confirmationTitle"></h2>
+                        <h2 id="confirmation-modal-title" class="text-lg font-bold text-ink" x-text="confirmationTitle"></h2>
                         <p id="confirmation-modal-message" class="mt-2 text-sm leading-6 text-slate-600" x-text="confirmationMessage"></p>
                     </div>
                 </div>
             </div>
 
-            <div class="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end">
+            <div class="flex flex-col-reverse gap-2 border-t border-canvas bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end">
                 <button
                     x-ref="confirmationCancel"
                     type="button"
                     x-on:click="cancelConfirmation()"
-                    class="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+                    class="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-canvas focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
                 >
                     Cancelar
                 </button>
@@ -68,7 +68,7 @@
                     class="rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2"
                     :class="confirmationVariant === 'danger'
                         ? 'bg-red-600 hover:bg-red-500 focus:ring-red-600'
-                        : 'bg-amber-500 text-slate-950 hover:bg-amber-400 focus:ring-amber-500'"
+                        : 'bg-amber-500 text-ink hover:bg-amber-400 focus:ring-amber-500'"
                     x-text="confirmationButton"
                 ></button>
             </div>

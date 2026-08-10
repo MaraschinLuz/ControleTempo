@@ -24,7 +24,7 @@
 
     $columnMeta = [
         'pending' => ['Pendente', 'Aguardando início', 'bg-amber-400', 'text-amber-700', 'border-amber-200'],
-        'in_progress' => ['Em andamento', 'Trabalho ativo', 'bg-cyan-400', 'text-cyan-700', 'border-cyan-200'],
+        'in_progress' => ['Em andamento', 'Trabalho ativo', 'bg-brand-400', 'text-brand-700', 'border-brand-200'],
         'completed' => ['Concluída', 'Trabalho finalizado', 'bg-emerald-400', 'text-emerald-700', 'border-emerald-200'],
     ];
 
@@ -41,15 +41,15 @@
     <x-slot name="header">
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div>
-                <p class="text-sm font-semibold text-cyan-700">Controle de demandas</p>
-                <h1 class="mt-1 text-2xl font-bold text-slate-950">Quadro de {{ $selectedUser->name }}</h1>
+                <p class="text-sm font-semibold text-brand-700">Controle de demandas</p>
+                <h1 class="mt-1 text-2xl font-bold text-ink">Quadro de {{ $selectedUser->name }}</h1>
                 <p class="mt-1 text-sm text-slate-500">Organize as entregas por etapa, projeto e prioridade.</p>
             </div>
             <div class="flex flex-wrap gap-2">
-                <a href="{{ route('demands.share', $shareQuery) }}" target="_blank" rel="noopener" class="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:border-cyan-400 hover:text-cyan-700">
+                <a href="{{ route('demands.share', $shareQuery) }}" target="_blank" rel="noopener" class="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:border-brand-400 hover:text-brand-700">
                     Compartilhar quadro
                 </a>
-                <button type="button" @click="$dispatch('open-demand-modal')" class="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 shadow-sm transition hover:bg-cyan-300">
+                <button type="button" @click="$dispatch('open-demand-modal')" class="rounded-xl bg-brand-400 px-5 py-3 text-sm font-bold text-ink shadow-sm transition hover:bg-brand-300">
                     + Nova demanda
                 </button>
             </div>
@@ -70,7 +70,7 @@
         @keydown.escape.window="closeModal()"
         @open-demand-modal.window="openCreate()"
     >
-        <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <section class="mb-6 rounded-2xl border border-canvas bg-white p-4 shadow-sm">
             <form method="GET" action="{{ route('demands.index') }}" class="grid gap-3 md:grid-cols-2 xl:grid-cols-[1.4fr_1fr_1fr_1fr_1fr_auto] xl:items-end">
                 @if(auth()->user()->isManagerOrAdmin())
                     <label class="text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -112,7 +112,7 @@
                     <input name="search" value="{{ request('search') }}" placeholder="Título ou descrição" class="mt-1 block w-full rounded-xl border-slate-300 text-sm">
                 </label>
                 <div class="flex gap-2">
-                    <button class="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white">Filtrar</button>
+                    <button class="rounded-xl bg-ink px-4 py-2.5 text-sm font-bold text-white">Filtrar</button>
                     @if(request()->hasAny(['project_id', 'priority', 'due_date', 'search']))
                         <a href="{{ route('demands.index', ['user_id' => $selectedUser->id]) }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-600">Limpar</a>
                     @endif
@@ -121,14 +121,14 @@
         </section>
 
         <div class="mb-4 flex items-center justify-between gap-3">
-            <p class="text-sm text-slate-500"><strong class="text-slate-900" x-text="demands.length"></strong> demandas exibidas</p>
-            <p x-show="statusMessage" x-transition x-text="statusMessage" aria-live="polite" class="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white"></p>
+            <p class="text-sm text-slate-500"><strong class="text-ink" x-text="demands.length"></strong> demandas exibidas</p>
+            <p x-show="statusMessage" x-transition x-text="statusMessage" aria-live="polite" class="rounded-full bg-ink px-3 py-1 text-xs font-semibold text-white"></p>
         </div>
 
         <div class="grid items-start gap-5 xl:grid-cols-3">
             @foreach($columnMeta as $status => [$label, $description, $dotColor, $textColor, $borderColor])
                 <section
-                    class="rounded-2xl border {{ $borderColor }} bg-slate-100/80 p-3"
+                    class="rounded-2xl border {{ $borderColor }} bg-canvas/80 p-3"
                     @dragover.prevent
                     @drop.prevent="dropIn('{{ $status }}')"
                 >
@@ -136,7 +136,7 @@
                         <div class="flex items-center gap-3">
                             <span class="h-3 w-3 rounded-full {{ $dotColor }}"></span>
                             <div>
-                                <h2 class="font-bold text-slate-900">{{ $label }}</h2>
+                                <h2 class="font-bold text-ink">{{ $label }}</h2>
                                 <p class="text-xs text-slate-500">{{ $description }}</p>
                             </div>
                         </div>
@@ -150,26 +150,26 @@
                                 @dragstart="startDragging(demand)"
                                 @dragend="draggingId = null"
                                 @dblclick="openEdit(demand)"
-                                class="group cursor-grab rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-cyan-300 hover:shadow-md active:cursor-grabbing"
+                                class="group cursor-grab rounded-2xl border border-canvas bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md active:cursor-grabbing"
                             >
                                 <div class="flex items-start justify-between gap-3">
                                     <span
                                         class="rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wide"
                                         :class="{
-                                            'bg-slate-100 text-slate-600': demand.priority === 'low',
+                                            'bg-canvas text-slate-600': demand.priority === 'low',
                                             'bg-blue-50 text-blue-700': demand.priority === 'medium',
                                             'bg-orange-50 text-orange-700': demand.priority === 'high',
                                             'bg-rose-50 text-rose-700': demand.priority === 'urgent',
                                         }"
                                         x-text="demand.priority_label"
                                     ></span>
-                                    <button type="button" @click="openEdit(demand)" class="rounded-lg px-2 py-1 text-xs font-bold text-slate-400 transition hover:bg-slate-100 hover:text-cyan-700" aria-label="Editar demanda">Editar</button>
+                                    <button type="button" @click="openEdit(demand)" class="rounded-lg px-2 py-1 text-xs font-bold text-slate-400 transition hover:bg-canvas hover:text-brand-700" aria-label="Editar demanda">Editar</button>
                                 </div>
-                                <h3 class="mt-3 font-bold leading-snug text-slate-950" x-text="demand.title"></h3>
+                                <h3 class="mt-3 font-bold leading-snug text-ink" x-text="demand.title"></h3>
                                 <p x-show="demand.description" class="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-500" x-text="demand.description"></p>
                                 <div class="mt-4 border-t border-slate-100 pt-3">
                                     <div class="flex items-center gap-2 text-xs text-slate-600">
-                                        <span class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-slate-100 font-black text-slate-500">P</span>
+                                        <span class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-canvas font-black text-slate-500">P</span>
                                         <span class="min-w-0"><strong class="block truncate" x-text="demand.project_name"></strong><span class="block truncate text-slate-400" x-text="demand.client_name"></span></span>
                                     </div>
                                     <div class="mt-3 flex items-center justify-between gap-2">
@@ -182,7 +182,7 @@
                                             :value="demand.status"
                                             @change="moveDemand(demand.id, $event.target.value)"
                                             @click.stop
-                                            class="ml-auto rounded-lg border-slate-200 py-1 pl-2 pr-7 text-xs font-semibold text-slate-600"
+                                            class="ml-auto rounded-lg border-canvas py-1 pl-2 pr-7 text-xs font-semibold text-slate-600"
                                             aria-label="Alterar status"
                                         >
                                             <option value="pending">Pendente</option>
@@ -198,7 +198,7 @@
                             x-show="column('{{ $status }}').length === 0"
                             type="button"
                             @click="openCreate('{{ $status }}')"
-                            class="grid min-h-32 w-full place-items-center rounded-2xl border-2 border-dashed border-slate-300 px-5 text-center text-sm font-semibold text-slate-400 transition hover:border-cyan-400 hover:bg-white hover:text-cyan-700"
+                            class="grid min-h-32 w-full place-items-center rounded-2xl border-2 border-dashed border-slate-300 px-5 text-center text-sm font-semibold text-slate-400 transition hover:border-brand-400 hover:bg-white hover:text-brand-700"
                         >Nenhuma demanda nesta etapa<br>+ Adicionar demanda</button>
                     </div>
                 </section>
@@ -207,15 +207,15 @@
 
         <div x-cloak x-show="modalOpen" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="demand-modal-title">
             <div class="flex min-h-full items-center justify-center p-4">
-                <div x-show="modalOpen" x-transition.opacity @click="closeModal()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"></div>
+                <div x-show="modalOpen" x-transition.opacity @click="closeModal()" class="fixed inset-0 bg-ink/60 backdrop-blur-sm"></div>
                 <div x-show="modalOpen" x-transition class="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl">
                     <div class="flex items-start justify-between border-b border-slate-100 px-6 py-5">
                         <div>
-                            <p class="text-xs font-black uppercase tracking-widest text-cyan-700" x-text="form.id ? 'Editar demanda' : 'Nova demanda'"></p>
-                            <h2 id="demand-modal-title" class="mt-1 text-xl font-bold text-slate-950" x-text="form.id ? form.title : 'Adicionar ao quadro'"></h2>
+                            <p class="text-xs font-black uppercase tracking-widest text-brand-700" x-text="form.id ? 'Editar demanda' : 'Nova demanda'"></p>
+                            <h2 id="demand-modal-title" class="mt-1 text-xl font-bold text-ink" x-text="form.id ? form.title : 'Adicionar ao quadro'"></h2>
                             <p class="mt-1 text-sm text-slate-500">Responsável: {{ $selectedUser->name }}</p>
                         </div>
-                        <button type="button" @click="closeModal()" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Fechar">✕</button>
+                        <button type="button" @click="closeModal()" class="rounded-xl p-2 text-slate-400 hover:bg-canvas hover:text-slate-700" aria-label="Fechar">✕</button>
                     </div>
 
                     <form id="demand-form" method="POST" :action="formAction()" class="grid gap-5 p-6 sm:grid-cols-2">
@@ -273,7 +273,7 @@
                         </form>
                         <div class="ml-auto flex gap-2">
                             <button type="button" @click="closeModal()" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-600">Cancelar</button>
-                            <button type="submit" form="demand-form" class="rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-black text-slate-950 hover:bg-cyan-300" x-text="form.id ? 'Salvar alterações' : 'Adicionar demanda'"></button>
+                            <button type="submit" form="demand-form" class="rounded-xl bg-brand-400 px-5 py-2.5 text-sm font-black text-ink hover:bg-brand-300" x-text="form.id ? 'Salvar alterações' : 'Adicionar demanda'"></button>
                         </div>
                     </div>
                 </div>

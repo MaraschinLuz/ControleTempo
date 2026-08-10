@@ -10,8 +10,8 @@
         'in_progress' => [
             'label' => 'Em andamento',
             'subtitle' => 'Trabalho ativo',
-            'dot' => 'bg-cyan-400',
-            'border' => 'border-cyan-200',
+            'dot' => 'bg-brand-400',
+            'border' => 'border-brand-200',
             'items' => $demands->where('status', \App\Enums\DemandStatus::InProgress)->values(),
         ],
         'completed' => [
@@ -24,7 +24,7 @@
     ];
 
     $priorityClasses = [
-        'low' => 'bg-slate-100 text-slate-600',
+        'low' => 'bg-canvas text-slate-600',
         'medium' => 'bg-blue-50 text-blue-700',
         'high' => 'bg-orange-50 text-orange-700',
         'urgent' => 'bg-rose-50 text-rose-700',
@@ -69,26 +69,26 @@
         .density-tight .share-project { margin-top: .25rem; padding-top: .25rem; font-size: .62rem; }
     </style>
 </head>
-<body class="min-h-screen bg-slate-100 font-sans text-slate-900 antialiased">
-    <div class="no-print fixed bottom-5 right-5 z-20 flex flex-wrap justify-end gap-2 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-xl backdrop-blur">
+<body class="min-h-screen bg-canvas font-sans text-ink antialiased">
+    <div class="no-print fixed bottom-5 right-5 z-20 flex flex-wrap justify-end gap-2 rounded-2xl border border-canvas bg-white/95 p-2 shadow-xl backdrop-blur">
         <a href="{{ route('demands.index', request()->query()) }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-600">Voltar ao quadro</a>
-        <button type="button" onclick="window.print()" class="rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-black text-slate-950">Imprimir ou salvar em PDF</button>
+        <button type="button" onclick="window.print()" class="rounded-xl bg-brand-400 px-5 py-2.5 text-sm font-black text-ink">Imprimir ou salvar em PDF</button>
     </div>
 
     <main class="share-sheet {{ $density }} mx-auto max-w-[1600px] p-5 lg:p-8">
         <header class="mb-5 flex items-start justify-between gap-6 border-b-2 border-slate-900 pb-4">
             <div>
                 <div class="mb-2 flex items-center gap-3">
-                    <span class="grid h-10 w-10 place-items-center rounded-xl bg-cyan-400 text-lg font-black text-slate-950">T</span>
+                    <span class="grid h-10 w-10 place-items-center rounded-xl bg-brand-400 text-lg font-black text-ink">T</span>
                     <div>
-                        <p class="text-xs font-black uppercase tracking-[.2em] text-cyan-700">Resumo para compartilhar</p>
-                        <h1 class="text-2xl font-black tracking-tight text-slate-950">Quadro de demandas</h1>
+                        <p class="text-xs font-black uppercase tracking-[.2em] text-brand-700">Resumo para compartilhar</p>
+                        <h1 class="text-2xl font-black tracking-tight text-ink">Quadro de demandas</h1>
                     </div>
                 </div>
-                <p class="text-sm text-slate-500">Responsável: <strong class="text-slate-900">{{ $selectedUser->name }}</strong></p>
+                <p class="text-sm text-slate-500">Responsável: <strong class="text-ink">{{ $selectedUser->name }}</strong></p>
             </div>
             <div class="text-right text-xs text-slate-500">
-                <p class="font-bold text-slate-900">Atualizado em {{ now()->format('d/m/Y \à\s H:i') }}</p>
+                <p class="font-bold text-ink">Atualizado em {{ now()->format('d/m/Y \à\s H:i') }}</p>
                 <p class="mt-1">{{ $demands->count() }} {{ $demands->count() === 1 ? 'demanda exibida' : 'demandas exibidas' }}</p>
                 @if($selectedProject)<p class="mt-1">Projeto: <strong>{{ $selectedProject->name }}</strong></p>@endif
                 @if($priorityLabel)<p class="mt-1">Prioridade: <strong>{{ $priorityLabel }}</strong></p>@endif
@@ -103,7 +103,7 @@
                         <div class="flex items-center gap-2.5">
                             <span class="h-3 w-3 rounded-full {{ $column['dot'] }}"></span>
                             <div>
-                                <h2 class="text-sm font-black text-slate-950">{{ $column['label'] }}</h2>
+                                <h2 class="text-sm font-black text-ink">{{ $column['label'] }}</h2>
                                 <p class="text-[10px] text-slate-500">{{ $column['subtitle'] }}</p>
                             </div>
                         </div>
@@ -112,9 +112,9 @@
 
                     <div class="share-card-list grid gap-2">
                         @forelse($column['items'] as $demand)
-                            <article class="share-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                            <article class="share-card rounded-xl border border-canvas bg-white p-3 shadow-sm">
                                 <div class="flex items-start justify-between gap-2">
-                                    <h3 class="share-card-title text-sm font-bold leading-snug text-slate-950">{{ $demand->title }}</h3>
+                                    <h3 class="share-card-title text-sm font-bold leading-snug text-ink">{{ $demand->title }}</h3>
                                     <span class="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wide {{ $priorityClasses[$demand->priority->value] }}">{{ $demand->priority->label() }}</span>
                                 </div>
                                 @if($demand->description)
@@ -133,14 +133,14 @@
                                 </div>
                             </article>
                         @empty
-                            <div class="rounded-xl border-2 border-dashed border-slate-200 py-8 text-center text-xs font-semibold text-slate-400">Nenhuma demanda</div>
+                            <div class="rounded-xl border-2 border-dashed border-canvas py-8 text-center text-xs font-semibold text-slate-400">Nenhuma demanda</div>
                         @endforelse
                     </div>
                 </section>
             @endforeach
         </div>
 
-        <footer class="mt-4 flex items-center justify-between border-t border-slate-200 pt-3 text-[10px] text-slate-400">
+        <footer class="mt-4 flex items-center justify-between border-t border-canvas pt-3 text-[10px] text-slate-400">
             <span>Tempo Interno · Controle de demandas</span>
             <span>Pendente → Em andamento → Concluída</span>
         </footer>

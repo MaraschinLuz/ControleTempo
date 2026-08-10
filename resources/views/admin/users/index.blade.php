@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between gap-4">
             <h1 class="text-2xl font-bold">Usuários</h1>
-            <a href="{{ route('users.create') }}" class="rounded-xl bg-cyan-500 px-4 py-2 font-bold">Novo usuário</a>
+            <a href="{{ route('users.create') }}" class="rounded-xl bg-brand-500 px-4 py-2 font-bold text-white">Novo usuário</a>
         </div>
     </x-slot>
 
@@ -14,7 +14,7 @@
                     <tr class="border-t">
                         <td class="p-4 font-semibold">{{ $item->name }}</td><td class="p-4">{{ $item->email }}</td><td class="p-4">{{ $item->role->label() }}</td><td class="p-4">{{ $item->active ? 'Ativo' : 'Inativo' }}</td>
                         <td class="p-4"><div class="flex items-center gap-3">
-                            <a class="font-semibold text-cyan-700" href="{{ route('users.edit', $item) }}">Editar</a>
+                            <a class="font-semibold text-brand-700" href="{{ route('users.edit', $item) }}">Editar</a>
                             @if($item->isNot(auth()->user()))
                                 <form method="POST" action="{{ route('users.destroy', $item) }}" data-confirm="O usuário será excluído. Os registros de horas serão preservados." data-confirm-title="Excluir usuário?" data-confirm-button="Excluir" data-confirm-variant="danger">@csrf @method('DELETE')<button class="font-semibold text-red-700">Excluir</button></form>
                             @endif
