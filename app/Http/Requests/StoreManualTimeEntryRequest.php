@@ -9,7 +9,7 @@ class StoreManualTimeEntryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('create', TimeEntry::class);
+        return $this->user()->can('createManual', TimeEntry::class);
     }
 
     public function rules(): array

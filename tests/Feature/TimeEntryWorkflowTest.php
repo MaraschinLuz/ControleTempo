@@ -37,7 +37,7 @@ class TimeEntryWorkflowTest extends TestCase
         $client = Client::factory()->create();
         $this->project = Project::factory()->for($client)->create(['status' => 'active']);
         $this->activity = Activity::factory()->create();
-        foreach (['retroactive_entry_max_days' => '30', 'require_retroactive_approval' => '1', 'allow_collaborator_edit' => '1', 'allow_collaborator_delete' => '0', 'maximum_running_timer_hours' => '24'] as $key => $value) {
+        foreach (['retroactive_entry_max_days' => '30', 'require_retroactive_approval' => '1', 'allow_collaborator_manual_entry' => '0', 'allow_collaborator_edit' => '1', 'allow_collaborator_delete' => '0', 'maximum_running_timer_hours' => '24'] as $key => $value) {
             Setting::create(compact('key', 'value'));
         }
         Cache::flush();
@@ -49,6 +49,69 @@ class TimeEntryWorkflowTest extends TestCase
         $this->assertSame(EntryStatus::Running, $entry->status);
         $this->assertNotNull($entry->started_at);
         $this->assertDatabaseHas('time_entry_audits', ['time_entry_id' => $entry->id, 'action' => 'created']);
+    }
+
+    public function test_manual_entry_is_disabled_for_collaborators_by_default(): void
+    {
+        $this->actingAs($this->user)
+            ->get(route('time-entries.create'))
+            ->assertForbidden();
+
+        $this->actingAs($this->user)
+            ->get(route('time-entries.index'))
+            ->assertOk()
+            ->assertDontSee('Adicionar horas');
+
+        $this->actingAs($this->user)
+            ->post(route('time-entries.store'), $this->manualEntryPayload())
+            ->assertForbidden();
+
+        $this->assertDatabaseCount('time_entries', 0);
+    }
+
+    public function test_setting_can_enable_manual_entries_for_collaborators(): void
+    {
+        Setting::where('key', 'allow_collaborator_manual_entry')->update(['value' => '1']);
+        Cache::flush();
+
+        $this->actingAs($this->user)
+            ->get(route('time-entries.create'))
+            ->assertOk();
+
+        $this->actingAs($this->user)
+            ->post(route('time-entries.store'), $this->manualEntryPayload())
+            ->assertRedirect(route('time-entries.index'));
+
+        $this->assertDatabaseHas('time_entries', [
+            'user_id' => $this->user->id,
+            'entry_type' => 'manual',
+        ]);
+    }
+
+    public function test_manual_entry_setting_does_not_disable_collaborator_timer(): void
+    {
+        $this->actingAs($this->user)
+            ->post(route('timer.start'), [
+                'project_id' => $this->project->id,
+                'activity_id' => $this->activity->id,
+                'description' => 'Trabalho pelo cronometro',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('time_entries', [
+            'user_id' => $this->user->id,
+            'entry_type' => 'timer',
+            'status' => 'running',
+        ]);
+    }
+
+    public function test_manager_can_add_hours_when_collaborator_setting_is_disabled(): void
+    {
+        $manager = User::factory()->manager()->create();
+
+        $this->actingAs($manager)
+            ->get(route('time-entries.create'))
+            ->assertOk();
     }
 
     public function test_postgres_uses_the_same_timezone_as_the_application(): void
@@ -207,6 +270,18 @@ class TimeEntryWorkflowTest extends TestCase
     private function runningEntry($start = null): TimeEntry
     {
         return TimeEntry::create(['user_id' => $this->user->id, 'project_id' => $this->project->id, 'activity_id' => $this->activity->id, 'started_at' => $start ?? now(), 'duration_seconds' => 0, 'entry_type' => 'timer', 'status' => 'running', 'created_by' => $this->user->id]);
+    }
+
+    private function manualEntryPayload(): array
+    {
+        return [
+            'project_id' => $this->project->id,
+            'activity_id' => $this->activity->id,
+            'started_at' => now()->subDay()->setTime(9, 0)->format('Y-m-d H:i'),
+            'ended_at' => now()->subDay()->setTime(10, 0)->format('Y-m-d H:i'),
+            'description' => 'Trabalho manual',
+            'justification' => 'Esqueci de iniciar o cronometro.',
+        ];
     }
 
     private function manual(string $start, string $end, ?User $actor = null, ?User $owner = null): TimeEntry

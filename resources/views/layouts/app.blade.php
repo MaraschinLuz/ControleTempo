@@ -38,7 +38,9 @@
             <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Navegação</p>
             <x-nav-link-sidebar icon="home" :href="route('dashboard')" :active="request()->routeIs('dashboard')">Visão geral</x-nav-link-sidebar>
             <x-nav-link-sidebar icon="entries" :href="route('time-entries.index')" :active="request()->routeIs('time-entries.index', 'time-entries.show', 'time-entries.edit')">Registros</x-nav-link-sidebar>
-            <x-nav-link-sidebar icon="plus-circle" :href="route('time-entries.create')" :active="request()->routeIs('time-entries.create')">Adicionar horas</x-nav-link-sidebar>
+            @can('createManual', \App\Models\TimeEntry::class)
+                <x-nav-link-sidebar icon="plus-circle" :href="route('time-entries.create')" :active="request()->routeIs('time-entries.create')">Adicionar horas</x-nav-link-sidebar>
+            @endcan
             <x-nav-link-sidebar icon="chart" :href="route('reports.index')" :active="request()->routeIs('reports.*')">Relatórios</x-nav-link-sidebar>
             <x-nav-link-sidebar icon="calendar" :href="route('project-schedules.index')" :active="request()->routeIs('project-schedules.*')">Cronograma</x-nav-link-sidebar>
             <x-nav-link-sidebar icon="kanban" :href="route('demands.index')" :active="request()->routeIs('demands.*')">Demandas</x-nav-link-sidebar>

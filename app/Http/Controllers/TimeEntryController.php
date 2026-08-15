@@ -30,7 +30,7 @@ class TimeEntryController extends Controller
 
     public function create(Request $request)
     {
-        Gate::authorize('create', TimeEntry::class);
+        Gate::authorize('createManual', TimeEntry::class);
 
         return view('time-entries.create', $this->options($request));
     }

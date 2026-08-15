@@ -29,6 +29,12 @@ class TimeEntryPolicy
         return $user->active;
     }
 
+    public function createManual(User $user): bool
+    {
+        return $user->active
+            && ($user->isManager() || Setting::bool('allow_collaborator_manual_entry', false));
+    }
+
     public function update(User $user, TimeEntry $entry): bool
     {
         if ($user->isManager()) {

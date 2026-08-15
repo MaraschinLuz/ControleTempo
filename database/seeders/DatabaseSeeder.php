@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
         $ana = User::factory()->create(['name' => 'Ana Colaboradora', 'email' => 'ana@tempo.local', 'password' => 'password']);
         $bruno = User::factory()->create(['name' => 'Bruno Colaborador', 'email' => 'bruno@tempo.local', 'password' => 'password']);
 
-        foreach (['retroactive_entry_max_days' => '30', 'require_retroactive_approval' => '1', 'allow_collaborator_edit' => '1', 'allow_collaborator_delete' => '0', 'maximum_running_timer_hours' => '24'] as $key => $value) {
+        foreach (['retroactive_entry_max_days' => '30', 'require_retroactive_approval' => '1', 'allow_collaborator_manual_entry' => '0', 'allow_collaborator_edit' => '1', 'allow_collaborator_delete' => '0', 'maximum_running_timer_hours' => '24'] as $key => $value) {
             Setting::create(compact('key', 'value'));
         }
         $clients = collect([
